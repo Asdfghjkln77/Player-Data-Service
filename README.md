@@ -86,4 +86,4 @@ returns a page with the leaderboard results sorted.
 ---
 
 ## 📄 Writer
-The author of this work is \[its\_asdf]
+The author of this work is [`its_asdf`](https://www.roblox.com/users/1706537119/profile)
