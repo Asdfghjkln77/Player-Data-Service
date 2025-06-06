@@ -20,6 +20,4 @@ Auxiliary module that makes it easier to use `PlayerDataService`, ideal for begi
 
 ## 🚀 How to Use
 
-### 1. Basic Configuration (with `SetupHelper`)
-
-[](./)
+You can easily use it with the Auxiliary module [`SetupHelper`](./SetupHelper.lua)
