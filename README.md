@@ -52,8 +52,8 @@ Loads a numeric value (`IntValue` or `NumberValue`) into the provided instance.
 ### 🔄 Save & Load Methods
 
 ```lua
-<DataObject | OrderedDataObject>:LoadPlayer(player, instance)
-<DataObject | OrderedDataObject>:SavePlayer(player, instance)
+<DataObject | OrderedDataObject>:LoadPlayer(player: Player, instance: Folder | NumberValue | IntValue)
+<DataObject | OrderedDataObject>:SavePlayer(player: Player, instance: Folder | NumberValue | IntValue)
 ```
 Loads or saves data using the provided instance (`Folder` or `ValueBase`).
 
@@ -84,9 +84,10 @@ Returns a sorted page of leaderboard results.
 
 ---
 
-## 💭 Examples of how to use
+## 💭 How to use
 
-* [`ServerScriptExample`](./ServerScriptExample.lua)
+* You need to make sure the [`ErrorService`](./ErrorService.lua) and the [`ProfileStore`](https://devforum.roblox.com/t/profilestore-save-your-player-data-easy-datastore-module/3190543) is parented to the parent as the  [`PlayerDataService`](./PlayerDataService.lua). And also if you want, parent [`SetupHelper`](./SetupHelper.lua) to the [`PlayerDataService`](./PlayerDataService.lua).
+* You can see the [`ServerScriptExample`](./ServerScriptExample.lua) for understand how to work with the module.
 
 ---
 
