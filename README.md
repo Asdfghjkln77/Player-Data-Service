@@ -1,97 +1,89 @@
-# 📦 PlayerDataService Module
+# 📦 Module PlayerDataService
 
-A modular and flexible data management system for Roblox, supporting both traditional and ordered data storage. This module abstracts DataStore operations and simplifies saving and loading player data.
-
----
-
-## 🔧 Setup
-
-You can set up the module in two ways:
-
-* **Manually**: Require the [`PlayerDataService`](./PlayerDataService.lua) module directly in your scripts.
-* **Using [`SetupHelper`](./SetupHelper.lua)**: A helper script bundled with the module (child of [`PlayerDataService`](./PlayerDataService.lua)) for easier integration.
+Roblox's versatile and adaptable data management system that supports both structured and conventional data storage. This module makes it easier to save and load player data by abstracting DataStore operations.
 
 ---
 
-## 🧪 Supported Data Types
+## 🔧 Configuration
 
-* **`"DataObject"`**
-  Uses [`ProfileStore`](https://devforum.roblox.com/t/profilestore-save-your-player-data-easy-datastore-module/3190543) for structured data (ideal for folders containing `ValueBase` instances).
+The module can be configured in two ways:
 
-* **`"OrderedDataObject"`**
-  Uses Roblox's `OrderedDataStore`, ideal for leaderboards and simple numeric rankings.
+* **Manually**: Require [`PlayerDataService`](./PlayerDataService.lua) and do it yourserlf based in the Module API.
+* **With SetupHelper**: Has plug-and-play functions.
 
 ---
 
-## 🧱 API Overview
+## 🧪 DataObject types
 
-### 🗃️ Get a Data Store
+* "DataObject": Uses [`ProfileStore`](https://devforum.roblox.com/t/profilestore-save-your-player-data-easy-datastore-module/3190543) for structured data (perfect for folders holding ValueBase instances).
+
+* "OrderedDataObject": Utilizes the default Roblox's OrderedDataStore, which is perfect for basic numerical rankings and leaderboards.
+
+---
+
+## Overview of the 🧱 API
+
+### 🗃️ Obtain a Data Store
 
 ```lua
-PlayerDataService.GetDataStore(storeName, objectType, defaultData)
+PlayerDataService.GetDataStore(defaultData, objectType, storeName)
 ```
+for a DataObject or OrderedDataObject, returns a data handler object.
 
-Returns a data handler object for either a `DataObject` or `OrderedDataObject`.
+### 📂 Configuration & Upload
 
-### 📂 Setup & Load
-
-#### For ProfileService-based data:
+#### For data based on ProfileService:
 
 ```lua
 <DataObject>:SetupPlayerForDataObject(player, folder, autoSaveTime)
 ```
-Creates and loads player data into a cloned folder. Returns the session profile and folder.
 
-#### For OrderedDataStore-based data:
+creates a cloned folder and loads player data into it. gives back the folder and session profile.
+
+#### For data based on OrderedDataStores:
 
 ```lua
 <OrderedDataObject>:SetupPlayerForOrderedDataObject(player: Player, valueInstance: IntValue | NumberValue, autoSaveTime: number)
 ```
-Loads a numeric value (`IntValue` or `NumberValue`) into the provided instance.
+loads a numeric value into the specified instance (either IntValue or NumberValue).
 
-### 🔄 Save & Load Methods
-
-```lua
-<DataObject | OrderedDataObject>:LoadPlayer(player: Player, instance: Folder | NumberValue | IntValue)
-<DataObject | OrderedDataObject>:SavePlayer(player: Player, instance: Folder | NumberValue | IntValue)
-```
-Loads or saves data using the provided instance (`Folder` or `ValueBase`).
-
-### 📊 Leaderboard Utilities
+### 🔄 Methods to Save and Load
 
 ```lua
-<OrderedDataObject>:GetSortedAsync(isAncending: boolean, pageSize: number, minValue: number?, maxValue: number?)
+<DataObject | OrderedDataObject>:LoadPlayer(player: Player, instance: Folder | NumberValue | IntValue) DataObject | OrderedDataObject>:SavePlayer(player: Player, instance: Folder | NumberValue | IntValue)
 ```
+Uses the supplied instance ({Folder or ValueBase) to load or store data.
 
-Returns a sorted page of leaderboard results.
+### 📊 List of Leaderboard Features
+
+```lua
+<OrderedDataObject>:GetSortedAsync(IsAncending: boolean, pageSize: number, minValue: number?, maxValue: number?)
+```
+returns a page with the leaderboard results sorted.
 
 ---
 
-## 📌 Notes & Behaviors
+## 📌 Remarks & Actions
 
-* Uses **data reconciliation** to apply missing fields in saved data.
-* **Auto-saves** player data at intervals and on exit.
-* **Fails gracefully**: Player is kicked if profile fails to load.
-* Supports `IsA("DataObject")` or `IsA("OrderedDataObject")` for type checks.
-* **Auto session cleanup** and error handling included.
+* **Auto-saves** player data on exit and at intervals. 
+* **Fails gracefully**: Apply missing fields in saved data using **data reconciliation**. If the profile does not load, the player gets kicked.
+* **Auto session cleanup** and error handling are included. IsA("DataObject") or IsA("OrderedDataObject") are supported for type checks.
 
 ---
 
-## 🔒 Security & Reliability
+## 🔒 Safety & Reliability
 
-* All critical operations (e.g., data saving/loading) use **safe retries** to handle transient DataStore errors.
-* Designed to be **extensible**—you can integrate with [`ErrorService`](./ErrorService.lua) for custom logging and alerts.
+**Safe retries** are used to handle temporary DataStore problems in all key processes, such as data loading and saving.
+* Designed to be **extensible** - for custom logging and alarms, you can integrate with [`ErrorService`](./ErrorService.lua).
 
 ---
 
 ## 💭 How to use
 
-* You need to make sure the [`ErrorService`](./ErrorService.lua) and the [`ProfileStore`](https://devforum.roblox.com/t/profilestore-save-your-player-data-easy-datastore-module/3190543) is parented to the parent as the  [`PlayerDataService`](./PlayerDataService.lua). And also if you want, parent [`SetupHelper`](./SetupHelper.lua) to the [`PlayerDataService`](./PlayerDataService.lua).
-* You can see the [`ServerScriptExample`](./ServerScriptExample.lua) for understand how to work with the module.
+* You must ensure that the [`ProfileStore`](https://devforum.roblox.com/t/profilestore-save-your-player-data-easy-datastore-module/3190543) and the [`ErrorService`](./ErrorService.lua) are parented to the parent as the [`PlayerDataService`](./PlayerDataService.lua). A parent [`SetupHelper`](./SetupHelper.lua) to the [`PlayerDataService`](./PlayerDataService.lua) is also an option if you would like.
+* To learn how to use the module, view the [`ServerScriptExample`](./ServerScriptExample.lua).
 
 ---
 
-## 📄 Author
-
-**Created by:** \[its\_asdf]
-You’re welcome to customize or extend this module to fit your game’s data handling needs.
+## 📄 Writer
+The author of this work is \[its\_asdf]
