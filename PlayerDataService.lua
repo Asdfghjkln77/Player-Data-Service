@@ -58,14 +58,26 @@ local DataStoreService = game:GetService("DataStoreService")
 local ErrorService = require(script.Parent.ErrorService)
 local ProfileStore = require(script.Parent.ProfileStore)
 
+-- Requires
+assert(ErrorService, "Missing module: ErrorService")
+assert(ProfileStore, "Missing module: ProfileStore")
+
 -- Module
 local PlayerDataService = {}
+
+-- Settings
+local DEFAULT_KEY_FORMAT = "Player_%d"
+
+local MAX_RETRIES = 10
+local RETRY_DELAY = 3
 
 -- Types
 export type TableTemplate = { [string]: any }
 
 export type DataObjectType = "DataObject"
 export type OrderedDataObjectType = "OrderedDataObject"
+
+export type PlayerProfile = ProfileStore.Profile<T>
 
 export type DataObject = {
 	-- DataStore
@@ -76,9 +88,9 @@ export type DataObject = {
 	
 	-- Functions
 	IsA: (self: DataObject, className: DataObjectType | OrderedDataObjectType) -> boolean,
-	SetupPlayerForDataObject: (self: DataObject, player: Player, folder: Folder) -> Folder,
+	SetupPlayerForDataObject: (self: DataObject, player: Player, folder: Folder, autoSaveTime: number) -> (PlayerProfile, Folder),
 	LoadPlayer: (self: DataObject, player: Player, folder: Folder) -> (),
-	SavePlayer: (self: DataObject, player: Player, folder: Folder) -> (),
+	SavePlayer: (self: DataObject, player: Player, folder: Folder, endSession: boolean?) -> (),
 	GetAsync: (self: OrderedDataObject, player: Player) -> any,
 	SetAsync: (self: OrderedDataObject, player: Player) -> ()
 }
@@ -91,37 +103,51 @@ export type OrderedDataObject = {
 
 	-- Functions
 	IsA: (self: DataObject, className: DataObjectType | OrderedDataObjectType) -> boolean,
-	SetupPlayerForOrderedDataObject: (self: DataObject, player: Player, valueInstance: IntValue | NumberValue) -> Folder,
+	SetupPlayerForOrderedDataObject: (self: DataObject, player: Player, valueInstance: IntValue | NumberValue, autoSaveTime: number) -> Folder,
 	LoadPlayer: (self: DataObject, player: Player, folder: Folder) -> (),
-	SavePlayer: (self: DataObject, player: Player, folder: Folder) -> (),
+	SavePlayer: (self: DataObject, player: Player, folder: Folder, endSession: boolean?) -> (),
 	GetAsync: (self: OrderedDataObject, player: Player) -> any,
-	GetSortedAsync: (self: OrderedDataObject, pageSize: number, minValue: number?, maxValue: number?, isAncending: boolean?) -> DataStorePages,
+	GetSortedAsync: (self: OrderedDataObject, isAncending: boolean, pageSize: number, minValue: number?, maxValue: number?) -> DataStorePages,
 	SetAsync: (self: OrderedDataObject, player: Player) -> ()
 }
 
 -- Private EndSession function
-local function EndSession(DataObj: DataObject, player: Player)
+local function EndSession(DataObj: DataObject, player: Player): ()
+	-- Checks
 	if not DataObj:IsA("DataObject") or not player then
 		return 
 	end
 	
-	local profile: ProfileStore.Profile<T> = DataObj.Profiles[player]
+	-- End session
+	local profile: PlayerProfile = DataObj.Profiles[player]
 	if profile then
 		profile:Save()
 		profile:EndSession()
 	end
 end
 
-local function HandleAutoSave(DataObject: DataObject | OrderedDataObject, player: Player, ins: Folder | NumberValue | IntValue)
+local function HandleAutoSave(DataObject: DataObject | OrderedDataObject, player: Player, ins: Folder | NumberValue | IntValue, autoSaveTime: number)
+	-- Auto-save loop
+	if autoSaveTime then
+		task.spawn(function()
+			while player and player:IsDescendantOf(Players) do
+				task.wait(autoSaveTime)
+				DataObject:SavePlayer(player, ins, false)
+			end
+		end)
+	end
+	
+	-- End session when player leaves
 	player.AncestryChanged:Connect(function()
 		if not player:IsDescendantOf(Players) then
-			DataObject:SavePlayer(player, ins)
+			DataObject:SavePlayer(player, ins, true)
 		end
 	end)
 end
 
 -- Private ConstructDataObject function
-local function ConstructDataObject(ObjectName: string, DataObjectType: DataObjectType | OrderedDataObjectType, defaultData: TableTemplate)
+local function ConstructDataObject(ObjectName: string, DataObjectType: DataObjectType | OrderedDataObjectType, defaultData: TableTemplate): ()
+	-- Create DataObject
 	local DataObject = setmetatable({}, {
 		__index = PlayerDataService,
 		__tostring = function()
@@ -129,9 +155,11 @@ local function ConstructDataObject(ObjectName: string, DataObjectType: DataObjec
 		end,
 	})
 	
+	-- Set DataObject properties
 	DataObject.ObjectType = DataObjectType
 	DataObject.SharedDataObjects = {}
 	
+	-- Set DataObject methods
 	local isNormalDataObject = DataObjectType == "DataObject"
 	if isNormalDataObject then
 		DataObject.DataStore = ProfileStore.New(ObjectName, defaultData)
@@ -140,11 +168,13 @@ local function ConstructDataObject(ObjectName: string, DataObjectType: DataObjec
 		DataObject.DataStore = DataStoreService:GetOrderedDataStore(ObjectName)
 	end
 	
+	-- Return DataObject
 	return DataObject
 end
 
 -- PlayerDataService Constructor (defaultData won't be needed if the objectType is equal to "OrderedDataObject")
-function PlayerDataService.GetDataStore(storeName: string, objectType: DataObjectType | OrderedDataObjectType, defaultData: TableTemplate)
+function PlayerDataService.GetDataStore(storeName: string, objectType: DataObjectType | OrderedDataObjectType, defaultData: TableTemplate): DataObject | OrderedDataObject
+	-- Checks
 	assert(storeName and typeof(storeName) == "string", "No store name provided or invalid type")
 	assert(objectType and (typeof(objectType) == "string" and (objectType == "DataObject" or objectType == "OrderedDataObject")), "No ObjectType provided or invalid type")
 	assert(objectType == "OrderedDataObject" or (defaultData and typeof(defaultData) == "table"), "Default data must be a table")
@@ -153,27 +183,31 @@ function PlayerDataService.GetDataStore(storeName: string, objectType: DataObjec
 end
 
 -- Function that returns if the className is equal to the DataObject ObjectType
-function PlayerDataService:IsA(className: DataObjectType | OrderedDataObjectType)
+function PlayerDataService:IsA(className: DataObjectType | OrderedDataObjectType): boolean
+	-- Checks
 	assert(self, "No self provided or invalid type")
 	
 	return self.ObjectType == className
 end
 
 -- Setup Player DataFolder with the DataObject
-function PlayerDataService:SetupPlayerForDataObject(player: Player, folder: Folder, autoConfig: boolean?): Folder
+function PlayerDataService:SetupPlayerForDataObject(player: Player, folder: Folder, autoSaveTime: number): (PlayerProfile, Folder)
+	-- Checks
 	assert(self, "No self provided or invalid type")
 	assert(self:IsA("DataObject"), "Invalid type of DataStore for this function")
-
+	
+	-- Create Profile
 	folder = folder:Clone()
 	folder.Name = tostring(self)
 	folder.Parent = player
 
-	local profile: ProfileStore.Profile<T>? = self.DataStore:StartSessionAsync("Player_" .. player.UserId, {
+	local profile: PlayerProfile? = self.DataStore:StartSessionAsync("Player_" .. player.UserId, {
 		Cancel = function()
 			return player.Parent ~= Players
 		end,
 	})
-
+	
+	-- Load Profile
 	if profile then
 		profile:AddUserId(player.UserId)
 		profile:Reconcile() -- Apply default data to missing fields
@@ -192,40 +226,42 @@ function PlayerDataService:SetupPlayerForDataObject(player: Player, folder: Fold
 		-- Populate folder
 		self:LoadPlayer(player, folder)
 		
-		HandleAutoSave(self, player, folder)
+		HandleAutoSave(self, player, folder, autoSaveTime)
 
-		return folder
+		return profile, folder
 	end
-
+	
+	-- Failed to load profile
 	warn("Failed to load profile for", player)
 	player:Kick("Profile failed to load. Please rejoin.")
 end
 
 -- Setup Player DataFolder with the DataObject
-function PlayerDataService:SetupPlayerForOrderedDataObject(player: Player, valueInstance: IntValue | NumberValue)
+function PlayerDataService:SetupPlayerForOrderedDataObject(player: Player, valueInstance: IntValue | NumberValue, autoSaveTime: number)
+	-- Checks
 	assert(self, "No self provided or invalid type")
 	assert(self:IsA("OrderedDataObject"), "Invalid type of DataStore for this function")
 	assert(player and (typeof(player) == "Instance" and player:IsA("Player")), "No Player provided or invalid type")
 	assert(valueInstance and (typeof(valueInstance) == "Instance" and (valueInstance:IsA("IntValue") or valueInstance:IsA("NumberValue"))), "No ValueInstance provided or invalid class")
-	
-	HandleAutoSave(self, player, valueInstance)
-	
+
+	-- Create Profile
+	HandleAutoSave(self, player, valueInstance, autoSaveTime)
 	self:LoadPlayer(player, valueInstance)
 end
 
 -- Function that loads the player's data with the provided folder with ValueBases
-function PlayerDataService:LoadPlayer(player: Player, ins: Folder | NumberValue)
+function PlayerDataService:LoadPlayer(player: Player, ins: Folder | NumberValue | IntValue): ()
+	-- Checks
 	assert(self, "No self provided")
 	assert(player and (typeof(player) == "Instance" and player:IsA("Player")), "No Player provided or invalid type")
 	assert(ins and (typeof(ins) == "Instance" and (ins:IsA("Folder") or ins:IsA("IntValue") or ins:IsA("NumberValue"))), "No Instance provided or invalid type")
 	
+	-- Checks
 	local isNormalDataObject = self:IsA("DataObject")
 	if isNormalDataObject then
-		--print("Cond1", isNormalDataObject)
-		local profile: ProfileStore.Profile<T>? = self.Profiles and self.Profiles[player]
+		local profile: PlayerProfile? = self.Profiles and self.Profiles[player]
 		
 		if profile.Data then
-			--print("Cond2", profile.Data)
 			for key, value in pairs(profile.Data) do
 				local valInstance = ins:FindFirstChild(key, true)
 				if valInstance and valInstance:IsA("ValueBase") then
@@ -233,7 +269,6 @@ function PlayerDataService:LoadPlayer(player: Player, ins: Folder | NumberValue)
 				end
 			end
 			
-			--print("Cond3", profile.Data)
 
 			return print(`{self.ObjectType} "{tostring(self)}" loaded for player "{player.Name}":`, profile.Data)
 		end
@@ -249,20 +284,19 @@ function PlayerDataService:LoadPlayer(player: Player, ins: Folder | NumberValue)
 end
 
 -- Function that saves the player's data with the provided Instance with ValueBases or not
-function PlayerDataService:SavePlayer(player: Player, ins: Folder | ValueBase)
+function PlayerDataService:SavePlayer(player: Player, ins: Folder | NumberValue | IntValue, endSession: boolean?): ()
+	-- Checks
 	assert(self, "No self provided or invalid type")
 	assert(player and (typeof(player) == "Instance" and player:IsA("Player")), "No Player provided or invalid type")
+	endSession = endSession or false
 	
 	local isNormalDataObject = self:IsA("DataObject")
-	
-	--print(tostring(self))
 	
 	local dataToSave
 	
 	if isNormalDataObject then
-		--print("Cond1", isNormalDataObject)
-		local profile: ProfileStore.Profile<T>? = self.Profiles[player]
-		--print("Cond2", profile)
+		-- Get the profile
+		local profile: PlayerProfile? = self.Profiles[player]
 		if not profile then return end
 
 		dataToSave = {}
@@ -274,11 +308,11 @@ function PlayerDataService:SavePlayer(player: Player, ins: Folder | ValueBase)
 			end
 		end
 		
-		--print("Cond3", dataToSave)
-
-		self:SetAsync(player, dataToSave)
-		
-		profile:EndSession()
+		-- Save the profile
+		self:SetAsync(player, dataToSave)		
+		if endSession then
+			profile:EndSession()
+		end
 	else
 		dataToSave = ins.Value
 		self:SetAsync(player, dataToSave)
@@ -286,9 +320,10 @@ function PlayerDataService:SavePlayer(player: Player, ins: Folder | ValueBase)
 end
 
 -- Function that gets the Sorted Ordered Data Store, useful for leaderboards (only works with OrderedDataObject)
-function PlayerDataService:GetSortedAsync(pageSize: number, minValue: number?, maxValue: number?, isAncending: boolean?): DataStorePages?
+function PlayerDataService:GetSortedAsync(isAncending: boolean, pageSize: number, minValue: number?, maxValue: number?): DataStorePages?
+	-- Checks
 	assert(self, "No self provided")
-	assert(self:IsA("OrderedDataStore"), "Invalid type of DataStore for this function")
+	assert(self:IsA("OrderedDataObject"), "Invalid type of DataStore for this function")
 	assert(pageSize and typeof(pageSize) == "number", "No number provided")
 	
 	-- Values setting tom avoid errors
@@ -296,7 +331,7 @@ function PlayerDataService:GetSortedAsync(pageSize: number, minValue: number?, m
 	minValue = minValue or 0
 	maxValue = maxValue or 100
 
-	local success, result = ErrorService.TryToExecute(5, 1, function()
+	local success, result = ErrorService.TryToExecute(MAX_RETRIES, RETRY_DELAY, function()
 		return self.DataStore:GetSortedAsync(isAncending, pageSize, minValue, maxValue)
 	end)
 	
@@ -308,22 +343,23 @@ function PlayerDataService:GetSortedAsync(pageSize: number, minValue: number?, m
 end
 
 -- Function that gets the player's data with the provided player (defaultValue parameter is only used when DataObject is Ordered)
-function PlayerDataService:GetAsync(player: Player)
+function PlayerDataService:GetAsync(player: Player): any
+	-- Checks
 	assert(self, "No self provided")
 	assert(player and (typeof(player) == "Instance" and player:IsA("Player")), "No Player provided")
-	
-	--print(tostring(self))
-	
+
 	if self:IsA("DataObject") then
-		local profile: ProfileStore.Profile<T>? = self.Profiles and self.Profiles[player]
+		-- Get the profile
+		local profile: PlayerProfile? = self.Profiles and self.Profiles[player]
 		if profile then
-			--print("Loaded", self, tostring(self), result)
 			return profile.Data
 		end
 		return warn(`Failed to get data from DataStore {tostring(self)} for Player  {player.Name} :`, profile.Data)
 	else
-		local success, result = ErrorService.TryToExecute(5, 1, function()
-			return self.DataStore:GetAsync("Player_" .. player.UserId)
+		-- Get the key
+		local key = string.format(DEFAULT_KEY_FORMAT, player.UserId)
+		local success, result = ErrorService.TryToExecute(MAX_RETRIES, RETRY_DELAY, function()
+			return self.DataStore:GetAsync(key)
 		end)
 		if success then
 			return result or 0
@@ -333,37 +369,38 @@ function PlayerDataService:GetAsync(player: Player)
 end
 
 -- Function that sets the player's data with the provided player and value
-function PlayerDataService:SetAsync(player: Player, value: {[string]: any} | number)
+function PlayerDataService:SetAsync(player: Player, value: {[string]: any} | number): ()
+	-- Checks
 	assert(self, "No self provided")
 	assert(player and (typeof(player) == "Instance" and player:IsA("Player")), "No Player provided or invalid type")
 	assert(value, "No value provided")
 
-	local isNormalDataObject = self:IsA("DataObject")
-	
-	--print(tostring(self))
+	local isNormalDataObject = self:IsA("DataObject") 
 
 	if isNormalDataObject then
-		--print("Cond1")
+		-- Get the profile
 		local profile = self.Profiles[player]
-		--print("Cond2", profile)
 		
-		for key, val in pairs(value) do -- This will make sure new value doesn't will overwrite other player's data values
+		-- This will make sure new value doesn't will overwrite other player's data values
+		for key, val in pairs(value) do
 			profile.Data[key] = val
 		end
 		
-		--print("Cond3", profile.Data)
-
-		return print(`Succefully setted {self.ObjectType} "{tostring(self)}" for player {player.Name}`, profile.Data)
+		-- Save the profile
+		return print(`Succefully set {self.ObjectType} "{tostring(self)}" for player {player.Name}`, profile.Data)
 	else
 		-- OrderedDataStore can only store numbers
 		if typeof(value) ~= "number" then
-			return warn(`Cannot save non-numeric value to {self.ObjectType} ({tostring(self)}), Invalid value: {tostring(value)}`)
+			error(`Cannot save non-numeric value to {self.ObjectType} ({tostring(self)}), Invalid value: {tostring(value)}`)
 		end
-
-		local success, err = ErrorService.TryToExecute(5, 1, function()
-			self.DataStore:SetAsync("Player_" .. player.UserId, value)
+		
+		-- Get the key
+		local playerKey = string.format(DEFAULT_KEY_FORMAT, player.UserId)
+		local success, err = ErrorService.TryToExecute(MAX_RETRIES, RETRY_DELAY, function()
+			self.DataStore:SetAsync(playerKey, value)
 		end)
-
+		
+		-- Check if the value was setted
 		if success then
 			return print(`Succefully setted {self.ObjectType} "{tostring(self)}" for player {player.Name}`, value)
 		else
