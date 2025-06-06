@@ -45,7 +45,7 @@
 	🔒 Security and Reliability
 	-----------------------------
 		- Network call attempts (like GetSortedAsync) are encapsulated with retry to avoid failures.
-		- Can be expanded with additional protections in the ErrorService.
+		- Protection expanded with the ErrorService.
 
 	Made by [its_asdf]
 ]]
