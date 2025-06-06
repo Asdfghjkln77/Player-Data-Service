@@ -26,7 +26,7 @@ The module can be configured in two ways:
 ### 🗃️ Obtain a Data Store
 
 ```lua
-PlayerDataService.GetDataStore(defaultData, objectType, storeName)
+PlayerDataService.GetDataStore(storeName: string, objectType: string, defaultData: table)
 ```
 for a DataObject or OrderedDataObject, returns a data handler object.
 
@@ -35,7 +35,7 @@ for a DataObject or OrderedDataObject, returns a data handler object.
 #### For data based on ProfileService:
 
 ```lua
-<DataObject>:SetupPlayerForDataObject(player, folder, autoSaveTime)
+<DataObject>:SetupPlayerForDataObject(player: Player, folder: Folder, autoSaveTime: number?)
 ```
 
 creates a cloned folder and loads player data into it. gives back the folder and session profile.
