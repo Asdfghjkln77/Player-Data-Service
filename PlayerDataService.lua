@@ -95,8 +95,8 @@ export type DataObject = {
 	SetupPlayerForDataObject: (self: DataObject, player: Player, folder: Folder, autoSaveTime: number) -> (PlayerProfile, Folder),
 	LoadPlayer: (self: DataObject, player: Player, folder: Folder) -> (),
 	SavePlayer: (self: DataObject, player: Player, folder: Folder, endSession: boolean?) -> (),
-	GetAsync: (self: OrderedDataObject, player: Player) -> any,
-	SetAsync: (self: OrderedDataObject, player: Player) -> ()
+	GetAsync: (self: DataObject, player: Player) -> any,
+	SetAsync: (self: DataObject, player: Player) -> ()
 }
 export type OrderedDataObject = {
 	-- DataStore
@@ -106,10 +106,10 @@ export type OrderedDataObject = {
 	ObjectType: DataObjectType | OrderedDataObjectType,
 
 	-- Functions
-	IsA: (self: DataObject, className: DataObjectType | OrderedDataObjectType) -> boolean,
-	SetupPlayerForOrderedDataObject: (self: DataObject, player: Player, valueInstance: IntValue | NumberValue, autoSaveTime: number) -> Folder,
-	LoadPlayer: (self: DataObject, player: Player, folder: Folder) -> (),
-	SavePlayer: (self: DataObject, player: Player, folder: Folder, endSession: boolean?) -> (),
+	IsA: (self: OrderedDataObject, className: DataObjectType | OrderedDataObjectType) -> boolean,
+	SetupPlayerForOrderedDataObject: (self: OrderedDataObject, player: Player, valueInstance: IntValue | NumberValue, autoSaveTime: number) -> Folder,
+	LoadPlayer: (self: OrderedDataObject, player: Player, folder: Folder) -> (),
+	SavePlayer: (self: OrderedDataObject, player: Player, folder: Folder, endSession: boolean?) -> (),
 	GetAsync: (self: OrderedDataObject, player: Player) -> any,
 	GetSortedAsync: (self: OrderedDataObject, isAncending: boolean, pageSize: number, minValue: number?, maxValue: number?) -> DataStorePages,
 	SetAsync: (self: OrderedDataObject, player: Player) -> ()
