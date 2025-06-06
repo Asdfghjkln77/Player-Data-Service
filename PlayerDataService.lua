@@ -88,7 +88,7 @@ export type DataObject = {
 	DataStore: typeof(ProfileStore.New()),
 
 	--  String type
-	ObjectType: DataObjectType | OrderedDataObjectType,
+	ObjectType: DataObjectType,
 	
 	-- Functions
 	IsA: (self: DataObject, className: DataObjectType | OrderedDataObjectType) -> boolean,
@@ -103,7 +103,7 @@ export type OrderedDataObject = {
 	DataStore: OrderedDataStore,
 	
 	--  String type
-	ObjectType: DataObjectType | OrderedDataObjectType,
+	ObjectType: OrderedDataObjectType,
 
 	-- Functions
 	IsA: (self: OrderedDataObject, className: DataObjectType | OrderedDataObjectType) -> boolean,
