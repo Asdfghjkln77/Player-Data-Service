@@ -3,7 +3,7 @@ local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
 
 -- Module References
-local dataModule = ServerStorage.Modules.PlayerDataService
+local dataModule = ServerStorage.Modules.PlayerDataService -- Change the path if you want
 local setupHelper = dataModule.SetupHelper
 
 -- Sub-Services
@@ -40,7 +40,7 @@ task.spawn(function()
 		local pages = KillsData:GetSortedAsync(isAncending, pageSize, minValue)
 		local firstPage = pages:GetCurrentPage()
 		
-		-- Loop through the page
+                --- Loop through the page
 		for rank, dict in ipairs(firstPage) do
 			-- Extracts the UserId and Kills from the dictionary
 			local userId = string.sub(dict.key, 8)
