@@ -58,7 +58,7 @@ local DataStoreService = game:GetService("DataStoreService")
 local ErrorService = require(script.Parent.ErrorService)
 local ProfileStore = require(script.Parent.ProfileStore)
 
--- Requires
+-- Asserts to check if the module is present
 assert(ErrorService, "Missing module: ErrorService")
 assert(ProfileStore, "Missing module: ProfileStore")
 
@@ -70,6 +70,10 @@ local DEFAULT_KEY_FORMAT = "Player_%d"
 
 local MAX_RETRIES = 10
 local RETRY_DELAY = 3
+
+-- Asserts to check if the settins is valids
+assert(MAX_RETRIES and typeof(MAX_RETRIES) == "number" and MAX_RETRIES % 1 == 0, "Invalid MAX_RETRIES value")
+assert(RETRY_DELAY and typeof(RETRY_DELAY) == "number" and RETRY_DELAY % 1 == 0, "Invalid MAX_RETRIES value")
 
 -- Types
 export type TableTemplate = { [string]: any }
