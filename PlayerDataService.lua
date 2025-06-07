@@ -20,7 +20,7 @@
 		🔹 PlayerDataService.GetDataStore(storeName: string, objectType: "DataObject" | "OrderedDataObject", defaultData: table)
 			→ Returns a handler object of the chosen type based on a store name and data template.
 
-		🔹 <DataObject>:SetupPlayerForDataObject(player: Player, folder: Folder): Folder
+		🔹 <DataObject>:SetupPlayerForDataObject(player: Player, folder: Folder): (PlayerProfile, Folder)
 			→ Creates session data for the player and loads the values ​​into the cloned folder.
 
 		🔹 <OrderedDataObject>:SetupPlayerForOrderedDataObject(player: Player, valueInstance: NumberValue | IntValue)
