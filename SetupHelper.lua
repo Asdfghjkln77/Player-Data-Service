@@ -2,23 +2,21 @@
 	SetupHelper - Mini API
 	-------------------------
 	🔧 Purpose:
-		Helper module to quickly initialize profiles using PlayerDataService.
-		It was made to facilitate the configuration of DataObjects and OrderedDataObjects with minimum complexity.
-		Ideal for those who want to plug and play with folders/values ​​already ready in the game.
+		Plug-and-Play module to quickly run the script
 
 	📦 Functions:
 
 		🔹 SetupHelper:GetDataObject(storeName: string, defaultData: table) -> DataObject
-			→ Creates and returns a DataObject using the PlayerDataService.
+			→ Returns a new DataObject from PlayerDataService
 
 		🔹 SetupHelper:GetOrderedDataObjectListFromFolder(folder: Folder) -> OrderedDataObjectList
-			→ Analyzes the provided folder and returns a list of OrderedDataObjects based on their NumberValues/IntValues.
+			→ Iterates over a folder instance and returns a OrderedDataObjectList
 			
 		🔹 SetupHelper:ConvertFolderToTableTemplate(folder: Folder) -> table
-			-> converts a folder to a table in order of PlayerDataService use
+			-> Iterates over a folder instance and returns a "{ [string]: any }" table
 		
 		🔹 SetupHelper:SetupPlayerForOrderedDataObjectList(player: Player, list: OrderedDataObjectList)
-			→ Clones the original folder, places it in the player and connects all OrderedDataObjects correctly.
+			→ Iterates over the list and setup the OrderedDataObject for the player
 
 	🧠 Types:
 
@@ -30,9 +28,9 @@
 		}
 
 	📁 Requirements:
-		script.Parent must be the `PlayerDataService` module, already functional.
+		Must be the PlayerDataService's child in the hierarchy
 
-	✅ Example of use: 
+	✅ Use example: 
 		```lua
 		-- Services
 		local Players = game:GetService("Players")
