@@ -1,48 +1,41 @@
 --[[
-	📦 PlayerDataService Module API
-	=========================
+	📦 PlayerDataService Module API:
+		Made to improve your DataStore experience and make it easier to setup in your games.
 
-		This module offers an abstract layer for normal and sorted (for rankings, for example) DataStores used to manage player data.
-
-	🔧 Setup
-	--------
-		The "SetupHelper" (parented to the PlayerDataService) or the "manually" approach needing the "PlayerDataService" module are the two options.
+	🔧 Setup:
+		You can require this module and do it yourself or you can require "SetupHelper" (More informations at its description)
 	
 
-	🧪 Available Types
-	--------------------
+	🧪 Available Types:
 		"DataObject" → Uses "ProfileStore" (new "ProfileService") to store sophisticated data in folders with ValueBase.
 		"OrderedDataObject" → Uses OrderedDataStore for basic rankings with Number/IntValue.
 
-	🧱 Main Functions
-	---------------------
+	🧱 Main Functions:
 		🔹 PlayerDataService.GetDataStore(storeName: string, objectType: "DataObject" | "OrderedDataObject", defaultData: table)
-			→ Uses a store name and data template to return a handler object of the selected type.
+			→ Returns a DataObject with the storeName and objectType, defaultData won't be needed if you use a OrderedDataStore.
 
 		🔹 <DataObject>:SetupPlayerForDataObject(player: Player, folder: Folder): (PlayerProfile, Folder)
-			→ Loads the values into the cloned folder and generates session data for the player.
+			→ Plug-and-play function to the player,you can use it on a PlayerAdded only for example.
 
 		🔹 <OrderedDataObject>:SetupPlayerForOrderedDataObject(player: Player, valueInstance: NumberValue | IntValue)
-			→ Loads a number instance with the ordered DataStore value.
+			→ Uses the valueInstance to handle a OrderedDataObject (I'd recommend you to use "SetupHelper" for this).
 
 		🔹 <DataObject | OrderedDataObject>:LoadPlayer(player: Player, instance: Folder | ValueBase)
-			→ Loads the instance's data (post-setup).
+			→ Loads player data and insert the values at the instance.
 
 		🔹 <DataObject | OrderedDataObject>:SavePlayer(player: Player, instance: Folder | ValueBase)
-			→ Saves the specified instance's player info.
+			→ Loads the values from the instance and saves it on the DataStore.
 
 		🔹 GetSortedAsync(isAscending: boolean, pageSize: number, minValue: number?, maxValue: number?): DataStorePages
-			→ Sorted results are returned on a page (used with OrderedDataObject).
+			→ OrderedDataStore native function, can be used for leaderboards for example.
 			
-	📌 Notes
-	--------------
+	📌 Notes:
 		- Any value will be missing in player's data
 		- Auto-Save system
 		- Kicks the player if something fails
 		- IsA function used for type checks
 
-	🔒 Security and Reliability
-	-----------------------------
+	🔒 Security and Reliability:
 		- Safe calls with retry system
 		- Free of any data obfuscations vunerabilities
 
