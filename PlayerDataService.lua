@@ -11,8 +11,8 @@
 		"OrderedDataObject" → Uses OrderedDataStore for basic rankings with Number/IntValue.
 
 	🧱 Main Functions:
-		🔹 PlayerDataService.GetDataStore(storeName: string, objectType: "DataObject" | "OrderedDataObject", defaultData: table)
-			→ Returns a DataObject with the storeName and objectType, defaultData won't be needed if you use a OrderedDataStore.
+		🔹 PlayerDataService.GetDataStore(storeName: string, objectType: "DataObject" | "OrderedDataObject", defaultData: { [string]: any } )
+			→ Returns a DataObject with the provided storeName and objectType, defaultData won't be needed if you use a OrderedDataStore.
 
 		🔹 <DataObject>:SetupPlayerForDataObject(player: Player, folder: Folder): (PlayerProfile, Folder)
 			→ Plug-and-play function to the player,you can use it on a PlayerAdded only for example.
