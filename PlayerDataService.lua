@@ -150,19 +150,14 @@ local function ConstructDataObject(ObjectName: string, DataObjectType: DataObjec
 			return ObjectName
 		end,
 	})
+
+	-- Constants
+	local isNormalDataObject = DataObjectType == "DataObject"
 	
 	-- Set DataObject properties
 	DataObject.ObjectType = DataObjectType
-	DataObject.SharedDataObjects = {}
-	
-	-- Set DataObject methods
-	local isNormalDataObject = DataObjectType == "DataObject"
-	if isNormalDataObject then
-		DataObject.DataStore = ProfileStore.New(ObjectName, defaultData)
-		DataObject.Profiles = {} -- [Player] = Profile
-	else
-		DataObject.DataStore = DataStoreService:GetOrderedDataStore(ObjectName)
-	end
+	DataObject.DataStore = isNormalDataObject and ProfileStore.New(ObjectName, defaultData) or DataStoreService:GetOrderedDataStore(ObjectName)
+	DataObjects.Profiles = isNormalDataObject and {}
 	
 	-- Return DataObject
 	return DataObject
