@@ -1,64 +1,64 @@
 --[[
-	SetupHelper - Mini API
-	-------------------------
-	🔧 Purpose:
-		Plug-and-Play module to quickly run the script
-
-	📦 Functions:
-
-		🔹 SetupHelper:GetDataObject(storeName: string, defaultData: table) -> DataObject
-			→ Returns a new DataObject from PlayerDataService
-
-		🔹 SetupHelper:GetOrderedDataObjectListFromFolder(folder: Folder) -> OrderedDataObjectList
-			→ Iterates over a folder instance and returns a OrderedDataObjectList
+	SetupHelper - Mini API:
+	
+		🔧 Purpose:
+			Plug-and-Play module to quickly run the script
+	
+		📦 Functions:
+	
+			🔹 SetupHelper:GetDataObject(storeName: string, defaultData: table) -> DataObject
+				→ Returns a new DataObject from PlayerDataService
+	
+			🔹 SetupHelper:GetOrderedDataObjectListFromFolder(folder: Folder) -> OrderedDataObjectList
+				→ Iterates over a folder instance and returns a OrderedDataObjectList
+				
+			🔹 SetupHelper:ConvertFolderToTableTemplate(folder: Folder) -> table
+				-> Iterates over a folder instance and returns a "{ [string]: any }" table
 			
-		🔹 SetupHelper:ConvertFolderToTableTemplate(folder: Folder) -> table
-			-> Iterates over a folder instance and returns a "{ [string]: any }" table
-		
-		🔹 SetupHelper:SetupPlayerForOrderedDataObjectList(player: Player, list: OrderedDataObjectList)
-			→ Iterates over the list and setup the OrderedDataObject for the player
-
-	🧠 Types:
-
-		type OrderedDataObjectList = {
-			OriginalFolder: Folder,
-			[PlayerDataService.OrderedDataObject]: {
-				ValueInstance: NumberValue | IntValue
+			🔹 SetupHelper:SetupPlayerForOrderedDataObjectList(player: Player, list: OrderedDataObjectList)
+				→ Iterates over the list and setup the OrderedDataObject for the player
+	
+		🧠 Types:
+	
+			type OrderedDataObjectList = {
+				OriginalFolder: Folder,
+				[PlayerDataService.OrderedDataObject]: {
+					ValueInstance: NumberValue | IntValue
+				}
 			}
-		}
-
-	📁 Requirements:
-		Must be the PlayerDataService's child in the hierarchy
-
-	✅ Use example: 
-		```lua
-		-- Services
-		local Players = game:GetService("Players")
-
-		-- Module References
-		local dataModule = path.to.PlayerDataService
-
-		-- Sub-Services
-		local PlayerDataService = require(dataModule)
-		local PlayerDataService_SetupHelper = require(dataModule.SetupHelper)
-
-		-- DataStore References
-		local dataFolder = path.to.DataFolder -- Remove if you don't want a DataStore
-		local tableTemplate = PlayerDataService.Helpers:ConvertFolderToTableTemplate(dataFolder) -- Remove if you don't want a DataStore
-		local data = PlayerDataService_SetupHelper:GetDataObject(dataFolder.Name, tableTemplate) -- Remove if you don't want a DataStore
-
-		-- OrderedDataStore References
-		local dataFolder2 = path.to.DataFolder2 -- Remove if you don't want a OrderedDataStore
-		local orderedDataList = PlayerDataService_SetupHelper:GetOrderedDataObjectListFromFolder(dataFolder2) -- Remove if you don't want a OrderedDataStore
-
-		-- Function that handles when a player is added
-		local function OnPlayerAdded(player: Player)
-			data:SetupPlayerForDataObject(player, dataFolder) -- Remove if you don't want a DataStore
-			PlayerDataService_SetupHelper:SetupPlayerForOrderedDataObjectList(player, orderedDataList) -- Remove if you don't want a OrderedDataStore
-		end
-
-		Players.PlayerAdded:Connect(OnPlayerAdded)
-		```
+	
+		📁 Requirements:
+			Must be the PlayerDataService's child in the hierarchy
+	
+		✅ Use example: 
+			```lua
+			-- Services
+			local Players = game:GetService("Players")
+	
+			-- Module References
+			local dataModule = path.to.PlayerDataService
+	
+			-- Sub-Services
+			local PlayerDataService = require(dataModule)
+			local PlayerDataService_SetupHelper = require(dataModule.SetupHelper)
+	
+			-- DataStore References
+			local dataFolder = path.to.DataFolder -- Remove if you don't want a DataStore
+			local tableTemplate = PlayerDataService.Helpers:ConvertFolderToTableTemplate(dataFolder) -- Remove if you don't want a DataStore
+			local data = PlayerDataService_SetupHelper:GetDataObject(dataFolder.Name, tableTemplate) -- Remove if you don't want a DataStore
+	
+			-- OrderedDataStore References
+			local dataFolder2 = path.to.DataFolder2 -- Remove if you don't want a OrderedDataStore
+			local orderedDataList = PlayerDataService_SetupHelper:GetOrderedDataObjectListFromFolder(dataFolder2) -- Remove if you don't want a OrderedDataStore
+	
+			-- Function that handles when a player is added
+			local function OnPlayerAdded(player: Player)
+				data:SetupPlayerForDataObject(player, dataFolder) -- Remove if you don't want a DataStore
+				PlayerDataService_SetupHelper:SetupPlayerForOrderedDataObjectList(player, orderedDataList) -- Remove if you don't want a OrderedDataStore
+			end
+	
+			Players.PlayerAdded:Connect(OnPlayerAdded)
+			```
 
 	Made by [its_asdf]
 ]]
