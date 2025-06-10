@@ -31,7 +31,7 @@
 		🔹 <DataObject | OrderedDataObject>:SavePlayer(player: Player, instance: Folder | ValueBase)
 			→ Saves the specified instance's player info.
 
-		🔹 GetSortedAsync(pageSize: number, minValue?: number, maxValue?: number, isAscending?: boolean): DataStorePages
+		🔹 GetSortedAsync(isAscending: boolean, pageSize: number, minValue: number?, maxValue: number?): DataStorePages
 			→ Sorted results are returned on a page (used with OrderedDataObject).
 			
 	📌 Notes
