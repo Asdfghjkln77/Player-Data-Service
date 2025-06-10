@@ -11,8 +11,8 @@
 
 	🧪 Available Types
 	--------------------
-		"OrderedDataObject" → Uses OrderedDataStore for basic rankings with Number/IntValue.
 		"DataObject" → Uses "ProfileStore" (new "ProfileService") to store sophisticated data in folders with ValueBase.
+		"OrderedDataObject" → Uses OrderedDataStore for basic rankings with Number/IntValue.
 
 	🧱 Main Functions
 	---------------------
