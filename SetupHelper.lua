@@ -1,7 +1,7 @@
 --[[
 	SetupHelper - Mini API:
 	
-		🔧 Purpose:
+		💭 Purpose:
 			Plug-and-Play module to quickly run the script
 	
 		📦 Functions:
