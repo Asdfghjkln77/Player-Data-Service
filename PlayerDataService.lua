@@ -159,7 +159,7 @@ local function ConstructDataObject(ObjectName: string, DataObjectType: DataObjec
 	-- Set DataObject properties
 	DataObject.ObjectType = DataObjectType
 	DataObject.DataStore = isNormalDataObject and ProfileStore.New(ObjectName, defaultData) or DataStoreService:GetOrderedDataStore(ObjectName)
-	DataObjects.Profiles = isNormalDataObject and {}
+	DataObject.Profiles = isNormalDataObject and {}
 	
 	-- Return DataObject
 	return DataObject
